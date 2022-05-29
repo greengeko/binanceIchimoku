@@ -159,26 +159,4 @@ cassa=round(float((client.get_asset_balance("USDT")["free"])))
     client.cancel_order(
         symbol=str(currentOrder[y]["status"]),
         orderId=currentOrder[y]["orderId"]           
-    )
-
-
- 
-#print(pairs)
-#OGNI TOT ORE
-def trovaPump(bot, update):
-  pumpvolume=[]
-  pos=0
-  for i in pairs:
-  #print(i)
-    daticoin=client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "5 hour ago UTC")
-  #print(client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "1 day ago UTC"))
-    for y in range(len(daticoin)-1): 
-      if (5*(float(daticoin[y][5]))<(float(daticoin[y+1][5]))) and 1.10*(float(daticoin[y][2]))<(float(daticoin[y+1][2]))  : 
-         if int(y+2)!=len(daticoin):
-          pumpvolume.insert(pos,i)
-         pos=pos+1
-         print(str(i) +" "+str(5-int(y+2)) + "h fa" )
-  
-  print(pumpvolume)
-
-   
+    )   
