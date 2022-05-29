@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-
-pip install python-telegram-bot
-
-pip install python-binance
-
 from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
 from operator import itemgetter
 import re
@@ -15,30 +9,35 @@ client = Client(api_key, api_secret)
 coins = client.get_all_coins_info()
 
 def my_max(sequence):
-    """Return the maximum element of a sequence"""
     if not sequence:
         raise ValueError('empty sequence')
-
     maximum = sequence[0]
-
     for item in sequence:
         if item > maximum:
             maximum = item
-
     return maximum
 
 def my_min(sequence):
-    """Return the minimum element of a sequence"""
     if not sequence:
         raise ValueError('empty sequence')
-
     minimum = sequence[0]
-
     for item in sequence:
         if item < minimum:
             minimum = item
-
     return minimum
+
+def setProfile():
+  api_key='insertApiKeyHere'
+  api_secret='insertApiSecretHere'
+  client = Client(api_key, api_secret)
+  coins = client.get_all_coins_info()
+  #all pairs
+  tickers=client.get_all_tickers()
+  pairs=[]
+  for i in range(len(tickers)):
+    if ((re.fullmatch(".*USDT$",tickers[i]["symbol"])) ): #or (re.fullmatch(".*BTC$",tickers[i]["symbol"]))
+      pairs.append(tickers[i]["symbol"])
+
 
 #all pairs
 tickers=client.get_all_tickers()
@@ -56,17 +55,13 @@ while(True):
     #print(i)
     daticoin=client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "6 hour ago UTC")
     #print(client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "1 day ago UTC"))
-    for y in range(len(daticoin)-1): 
-      #PER MICHELE: MODIFICARE IL PRIMO 5 CON 7-8-9-10 QUEL CHE VUOI SE VUOI VEDERE I PUMP PIù GRANDI
-      #PER REI: TVB
+    for y in range(len(daticoin)-1):
       if (5*(float(daticoin[y][5]))<(float(daticoin[y+1][5]))) and 1.10*(float(daticoin[y][2]))<(float(daticoin[y+1][2]))  : 
          if int(y+2)!=len(daticoin):
           pumpvolume.insert(pos,i)
           pos=pos+1
          print(str(i) +" "+str(5-int(y+2)) + "h fa" )
       
-      
-  
 print(pumpvolume)
 
 #roba per calcolo kijunsen
@@ -166,58 +161,8 @@ cassa=round(float((client.get_asset_balance("USDT")["free"])))
         orderId=currentOrder[y]["orderId"]           
     )
 
-from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
-from operator import itemgetter
-from telegram.ext import Updater, CommandHandler
-import requests
-import re
 
-
-
-
-def setProfilo():
-  api_key='insertApiKeyHere'
-  api_secret='insertApiSecretHere'
-  client = Client(api_key, api_secret)
-  coins = client.get_all_coins_info()
-  #all pairs
-  tickers=client.get_all_tickers()
-  pairs=[]
-  for i in range(len(tickers)):
-    if ((re.fullmatch(".*USDT$",tickers[i]["symbol"])) ): #or (re.fullmatch(".*BTC$",tickers[i]["symbol"]))
-      pairs.append(tickers[i]["symbol"])
-
-
-def my_max(sequence):
-    """Return the maximum element of a sequence"""
-    if not sequence:
-        raise ValueError('empty sequence')
-
-    maximum = sequence[0]
-
-    for item in sequence:
-        if item > maximum:
-            maximum = item
-
-    return maximum
-
-def my_min(sequence):
-    """Return the minimum element of a sequence"""
-    if not sequence:
-        raise ValueError('empty sequence')
-
-    minimum = sequence[0]
-
-    for item in sequence:
-        if item < minimum:
-            minimum = item
-
-    return minimum    
-
-
-
-
-
+ 
 #print(pairs)
 #OGNI TOT ORE
 def trovaPump(bot, update):
@@ -236,10 +181,4 @@ def trovaPump(bot, update):
   
   print(pumpvolume)
 
-def main():
-    updater = Updater('insertUpdaterCodeHere')
-    dp = updater.dispatcher
-    setProfilo()
-    dp.add_handler(CommandHandler('trovaPump',trovaPump))
-    updater.start_polling()
-    updater.idle()
+   
