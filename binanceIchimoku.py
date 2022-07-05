@@ -1,66 +1,12 @@
-from binance import Client, ThreadedWebsocketManager, ThreadedDepthCacheManager
-from operator import itemgetter
-import re
-import timer
-api_key='insertyourapikey'
-api_secret='insertyourapisecret'
-client = Client(api_key, api_secret)
+from binance import Client
+import utils
 
+client, pairs = utils.setProfile()
 coins = client.get_all_coins_info()
-
-def my_max(sequence):
-    if not sequence:
-        raise ValueError('empty sequence')
-    maximum = sequence[0]
-    for item in sequence:
-        if item > maximum:
-            maximum = item
-    return maximum
-
-def my_min(sequence):
-    if not sequence:
-        raise ValueError('empty sequence')
-    minimum = sequence[0]
-    for item in sequence:
-        if item < minimum:
-            minimum = item
-    return minimum
-
-def setProfile():
-  api_key='insertApiKeyHere'
-  api_secret='insertApiSecretHere'
-  client = Client(api_key, api_secret)
-  coins = client.get_all_coins_info()
-  #all pairs
-  tickers=client.get_all_tickers()
-  pairs=[]
-  for i in range(len(tickers)):
-    if ((re.fullmatch(".*USDT$",tickers[i]["symbol"])) ): #or (re.fullmatch(".*BTC$",tickers[i]["symbol"]))
-      pairs.append(tickers[i]["symbol"])
-
-
-#all pairs
-tickers=client.get_all_tickers()
-pairs=[]
-for i in range(len(tickers)):
-  if ((re.fullmatch(".*USDT$",tickers[i]["symbol"])) ): #or (re.fullmatch(".*BTC$",tickers[i]["symbol"]))
-    pairs.append(tickers[i]["symbol"])
-
 
 #print(pairs)
 while(True):
-  pumpvolume=[]
-  pos=0
-  for i in pairs:
-    #print(i)
-    daticoin=client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "6 hour ago UTC")
-    #print(client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "1 day ago UTC"))
-    for y in range(len(daticoin)-1):
-      if (5*(float(daticoin[y][5]))<(float(daticoin[y+1][5]))) and 1.10*(float(daticoin[y][2]))<(float(daticoin[y+1][2]))  : 
-         if int(y+2)!=len(daticoin):
-          pumpvolume.insert(pos,i)
-          pos=pos+1
-         print(str(i) +" "+str(5-int(y+2)) + "h fa" )
+ pumpvolume=utils.findPump(client)
       
 print(pumpvolume)
 
@@ -108,18 +54,18 @@ print(pumpvolume)
   # kijunsen=max+min/2
 
 cassa=round(float((client.get_asset_balance("USDT")["free"])))
-  print(client.get_asset_balance("USDT")["free"])
-  print("Cassa:"+str(cassa))
+print(client.get_asset_balance("USDT")["free"])
+print("Cassa:"+str(cassa))
 #getTot disponibile e diviso per len(pumpVolume)
 #crea copia dictionary di pumpvolume[] e kijunsen[]
 #if prezzo attuale >*kinjunsen*0.95 allora place kinjunsen order (orderid in lista), altrimenti delete da lista
 #when order kinjun è completo place oco order con 5% (oco orderid in lista) delete da lista
 #when normal order è canceled delete da lista
-  currentOrder=[]
+currentOrder=[]
   
 #for sul pumpvolume
-  a=0
-  for c in range(len(pumpvolume)):
+a=0
+for c in range(len(pumpvolume)):
 # quantity= [usdt/price]
     prezzoatt=client.get_symbol_ticker(symbol=pumpvolume[c])["price"]
     print("prezzoatt:"+str(pumpvolume[c])+" -"+str(prezzoatt))
@@ -138,8 +84,8 @@ cassa=round(float((client.get_asset_balance("USDT")["free"])))
     print(str(currentOrder[c]))
   
   timeout = 60*60*3
-  timeout_start = time.time()
-  while len(pumpvolume)>0 and time.time() < timeout_start + timeout:
+timeout_start = time.time()
+while len(pumpvolume)>0 and time.time() < timeout_start + timeout:
     
 #for
     for d in range(len(pumpvolume)):
@@ -159,4 +105,4 @@ cassa=round(float((client.get_asset_balance("USDT")["free"])))
     client.cancel_order(
         symbol=str(currentOrder[y]["status"]),
         orderId=currentOrder[y]["orderId"]           
-    )   
+    )
