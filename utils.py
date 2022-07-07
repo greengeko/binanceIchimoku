@@ -1,8 +1,8 @@
 from binance import Client
 import re
 
-api_key = 'insertyourapikey'
-api_secret = 'insertyourapisecret'
+api_key = 'insert'
+api_secret = 'insert'
 
 
 def my_max(sequence):
@@ -45,7 +45,7 @@ def findPump(client):
         for y in range(len(daticoin) - 1):
             if (5 * (float(daticoin[y][5])) < (float(daticoin[y + 1][5]))) and 1.10 * (float(daticoin[y][2])) < (
             float(daticoin[y + 1][2])):
-                if int(y + 2) != len(daticoin):
+                if int(y + 2) != len(daticoin): #??
                     pumpvolume.insert(pos, i)
                     pos = pos + 1
                 print(str(i) + " " + str(5 - int(y + 2)) + "h fa")
