@@ -1,8 +1,10 @@
 from binance import Client
 import re
 
-api_key = 'insert'
-api_secret = 'insert'
+import api
+
+api_key = api.api_key  # 'insert here'
+api_secret = api.api_secret  # 'insert here'
 
 
 def my_max(sequence):
@@ -44,9 +46,36 @@ def findPump(client):
         daticoin = client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "6 hour ago UTC")
         for y in range(len(daticoin) - 1):
             if (5 * (float(daticoin[y][5])) < (float(daticoin[y + 1][5]))) and 1.10 * (float(daticoin[y][2])) < (
-            float(daticoin[y + 1][2])):
-                if int(y + 2) != len(daticoin): #??
+                    float(daticoin[y + 1][2]) and float(daticoin[y][4]) < 1.50 * float(daticoin[y][2])):
+                if int(y + 2) != len(daticoin) and i not in pumpvolume:  # ??
                     pumpvolume.insert(pos, i)
                     pos = pos + 1
-                print(str(i) + " " + str(5 - int(y + 2)) + "h fa")
+                print(str(i) + " " + str(6 - int(y + 2)) + "h fa")
     return pumpvolume
+
+
+def getKijunsen(client, pumpvolume):
+    kijunsen = []
+    maxlist = []
+    minlist = []
+    s = 0
+    for i in pumpvolume:
+        coindata = client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "26 hour ago UTC")
+        # print(coindata)
+    maxlistprov = []
+    minlistprov = []
+    for a in range(len(coindata)):
+        maxlistprov.insert(a, coindata[a][2])  # high
+        minlistprov.insert(a, coindata[a][3])  # low
+    minlist.insert(s, my_min(minlistprov))
+    maxlist.insert(s, my_max(maxlistprov))
+    s = s + 1
+    print(maxlist)
+    print(minlist)
+    # kijunsen=max+min/2
+    # risolvere problema arrotondamenti
+    for b in range(len(pumpvolume)):
+        kij = float(maxlist[b]) + float(minlist[b])
+        kijunsen.insert(b, kij / 2)
+    print(kijunsen)
+    return kijunsen
