@@ -1,11 +1,18 @@
-from utils import aggiusta
+import utils
+from binanceIchimoku import client
+from utils import formatForBinance
 
 
-def aggiusta_test():
-    print(aggiusta('0.045000', '0.239930300379'))
-    assert aggiusta('0.045000', '0.239930300379')=='0.239'
+def formatForBinance_test():
+    print(formatForBinance('0.24100000', '0.237'))
+    assert formatForBinance('0.24100000', '0.237') == '0.237'
+
+
+def findPump_test():
+    print(utils.findPump(client))
 
 
 if __name__ == "__main__":
-    aggiusta_test()
+    formatForBinance_test()
+    findPump_test()
     print("Everything passed")

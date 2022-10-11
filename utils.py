@@ -36,21 +36,25 @@ def findPump(client):
     pairs = []
     tickers = client.get_all_tickers()
     for i in range(len(tickers)):
-        if re.fullmatch(".*USDT$", tickers[i]["symbol"]):  # or (re.fullmatch(".*BTC$",tickers[i]["symbol"]))
+        if re.fullmatch(".*BTC$", tickers[i]["symbol"]):  # or (re.fullmatch(".*USDT$",tickers[i]["symbol"]))
             pairs.append(tickers[i]["symbol"])
 
     pumpvolume = []
     pos = 0
     for i in pairs:
-        # print(i)
-        daticoin = client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "6 hour ago UTC")
-        for y in range(len(daticoin) - 1):
-            if (5 * (float(daticoin[y][5])) < (float(daticoin[y + 1][5]))) and 1.10 * (float(daticoin[y][2])) < (
-                    float(daticoin[y + 1][2]) and float(daticoin[y][4]) < 1.50 * float(daticoin[y][2])):
-                if int(y + 2) != len(daticoin) and i not in pumpvolume:  # ??
+        #:return: list of OHLCV values, useful:
+        # 1:Open, 2:High, 3:Low, 4:Close, 5:Volume
+        daticoin = client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "4 hour ago UTC")
+        for y in range(len(daticoin) - 1):  # TODO:xk -1?
+            # Volume at least 5times greater than the h before && at least 10% higher max than the h before
+            # && the tail high is not greater than candle closure more than 5%
+            #&& the tail is not longer than the candle itself
+            if 5 * float(daticoin[y][5]) < float(daticoin[y + 1][5]) and 1.10 * float(daticoin[y][2]) < float(
+                    daticoin[y + 1][2]) and float(daticoin[y+1][2])-float(daticoin[y+1][4]) < float(daticoin[y+1][4])-float(daticoin[y+1][1]) :
+                if int(y + 2) != len(daticoin) and i not in pumpvolume:  # discard the duplicates
                     pumpvolume.insert(pos, i)
                     pos = pos + 1
-                print(str(i) + " " + str(6 - int(y + 2)) + "h fa")
+                print(str(i) + " " + str(4 - int(y + 2)) + "h ago")
     return pumpvolume
 
 
@@ -62,20 +66,51 @@ def getKijunsen(client, pumpvolume):
     for i in pumpvolume:
         coindata = client.get_historical_klines(i, Client.KLINE_INTERVAL_1HOUR, "26 hour ago UTC")
         # print(coindata)
-    maxlistprov = []
-    minlistprov = []
-    for a in range(len(coindata)):
-        maxlistprov.insert(a, coindata[a][2])  # high
-        minlistprov.insert(a, coindata[a][3])  # low
-    minlist.insert(s, my_min(minlistprov))
-    maxlist.insert(s, my_max(maxlistprov))
-    s = s + 1
+        maxlistprov = []
+        minlistprov = []
+        for a in range(len(coindata)):
+            maxlistprov.insert(a, float(coindata[a][2]))  # high
+            minlistprov.insert(a, float(coindata[a][3]))  # low
+        minlist.insert(s, my_min(minlistprov))
+        maxlist.insert(s, my_max(maxlistprov))
+        s = s + 1
+    print("maxlist: ")
     print(maxlist)
+    print("minlist: ")
     print(minlist)
     # kijunsen=max+min/2
     # risolvere problema arrotondamenti
-    for b in range(len(pumpvolume)):
+    for b in range(len(maxlist)):
         kij = float(maxlist[b]) + float(minlist[b])
-        kijunsen.insert(b, kij / 2)
+        kij = convert_scientific_to_decimal(kij / 2)
+        kijunsen.insert(b, kij)
+    print("kijunsen: ")
     print(kijunsen)
     return kijunsen
+
+
+def formatForBinance(number, newNumber):
+    while number[-1] == '0':
+        number = number[0:-1]
+    digits = number[::-1].find('.')
+    newNumber = f"{newNumber}"
+    digitsNew = newNumber[::-1].find('.')
+    if digitsNew > digits:
+        newNumber = newNumber[0:-(digitsNew - digits)]
+    # digits = newNumber[::-1].find('.')
+    return f"{newNumber}"
+
+
+def convert_scientific_to_decimal(num):
+    if 'e' in str(num):
+        return "{:.15f}".format(float(str(num)))
+    else:
+        return str(num)
+
+
+def clean(client,currentOrder):
+    for y in range(len(currentOrder)):
+        client.cancel_order(
+            symbol=str(currentOrder[y]["status"]),
+            orderId=currentOrder[y]["orderId"]
+        )
