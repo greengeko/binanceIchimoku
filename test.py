@@ -1,18 +1,21 @@
 import utils
-from binanceIchimoku import client
+#from binanceIchimoku import client
 from utils import formatForBinance
 
 
 def formatForBinance_test():
-    print(formatForBinance('0.24100000', '0.237'))
-    assert formatForBinance('0.24100000', '0.237') == '0.237'
+    print(formatForBinance('1.00000', '947.237'))
+    assert formatForBinance('1.00000', '947.237') == '947'
+
+def formatForBinance_test2():
+    print(formatForBinance('100.2508', '947.237'))
+    assert formatForBinance('100.2508', '947.237') == '947.2370'
+
+#def findPump_test():
+ #   print(utils.findPump(client))
 
 
-def findPump_test():
-    print(utils.findPump(client))
-
-
-if __name__ == "__main__":
-    formatForBinance_test()
-    findPump_test()
-    print("Everything passed")
+formatForBinance_test()
+formatForBinance_test2()
+#findPump_test()
+print("Everything passed")

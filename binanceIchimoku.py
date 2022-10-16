@@ -1,8 +1,6 @@
-import datetime
 import utils
-from datetime import time
+from datetime import time as time_
 from time import sleep
-
 
 client = utils.setProfile()
 coins = client.get_all_coins_info()
@@ -17,7 +15,6 @@ else:
 kijunsen = utils.getKijunsen(client, pumpvolume)
 
 # Personal account operations
-# cassa = round(float((client.get_asset_balance("BTC")["free"])))  # TODO: semplificare
 print("Cassa: " + client.get_asset_balance("BTC")["free"])
 
 # TODO: creare uno schema
@@ -33,17 +30,18 @@ for c in range(len(pumpvolume)):
     prezzoatt = client.get_symbol_ticker(symbol=pumpvolume[c])["price"]
     if float(client.get_asset_balance("BTC")["free"]) > 0.002:  # around $40
         print("prezzoatt:" + str(pumpvolume[c]) + " -" + str(prezzoatt))
-        if float(kijunsen[c]) > float(prezzoatt) > float(kijunsen[c]) * 0.95:
+        if float(kijunsen[c]) > float(prezzoatt) > float(kijunsen[c]) * 0.96:
             prezzobuy = prezzoatt
-        else:
-            prezzobuy = utils.formatForBinance(str(prezzoatt), str(kijunsen[c]))
+        elif float(prezzoatt) > float(kijunsen[c]) * 0.96 :
+            prezzobuy = utils.formatForBinance(str(prezzoatt), str(kijunsen[c])) # meglio con ticksize
+        else : break
         print("prezzobuy:" + str(prezzobuy))
 
         # order BUY
         stepsize = client.get_symbol_info(symbol=pumpvolume[c])["filters"][2]["stepSize"]
         print("stepsize " + str(stepsize))
         quantity = utils.formatForBinance(stepsize, (0.002 / float(prezzoatt)))
-
+        print(str(quantity))
         try:
             currentOrder.insert(c, client.order_limit_buy(symbol=pumpvolume[c],
                                                           quantity=quantity,
@@ -53,25 +51,21 @@ for c in range(len(pumpvolume)):
         print(str(currentOrder[c]))
 
 # oco orders
-timeout_start = datetime.now()
 
-delta = datetime.timedelta(hours = 3)
+#startTime = time_.time()
 
-
-print((datetime.datetime.combine(datetime.date(1,1,1),timeout_start) + delta).time())
-
-while len(pumpvolume) > 0 and datetime.now < ((datetime.datetime.combine(datetime.date(1,1,1),timeout_start) + delta).time()):
+while len(pumpvolume) > 0 :#and time_.time() - startTime < 10800:
 
     for d in range(len(pumpvolume)):
         if currentOrder[d]["status"] == 'FILLED':
             try:
                 client.order_oco_sell(symbol=pumpvolume[d],
                                       quantity=currentOrder[d]["executedQty"],
-                                      price=utils.formatForBinance(currentOrder[d]["price"], str(kijunsen[d] * 1.05)),
+                                      price=utils.formatForBinance(currentOrder[d]["price"], str(kijunsen[d] * 1.04)),
                                       stopPrice=utils.formatForBinance(currentOrder[d]["price"],
-                                                                       str(kijunsen[d] * 0.95)),
+                                                                       str(kijunsen[d] * 0.96)),
                                       stopLimitPrice=utils.formatForBinance(currentOrder[d]["price"],
-                                                                            str(kijunsen[d] * 0.95)),
+                                                                            str(kijunsen[d] * 0.96)),
                                       stopLimitTimeInForce='FOK')
             except IOError as err:
                 print("OCO order error: {0}".format(err))
@@ -81,4 +75,4 @@ while len(pumpvolume) > 0 and datetime.now < ((datetime.datetime.combine(datetim
     sleep(300)
 
     # delete the orders which in 3h haven't been still FILLED
-    utils.clean(client, currentOrder)
+utils.clean(client, currentOrder)

@@ -79,7 +79,6 @@ def getKijunsen(client, pumpvolume):
     print("minlist: ")
     print(minlist)
     # kijunsen=max+min/2
-    # risolvere problema arrotondamenti
     for b in range(len(maxlist)):
         kij = float(maxlist[b]) + float(minlist[b])
         kij = convert_scientific_to_decimal(kij / 2)
@@ -90,14 +89,21 @@ def getKijunsen(client, pumpvolume):
 
 
 def formatForBinance(number, newNumber):
+    #delete extra zeros
     while number[-1] == '0':
         number = number[0:-1]
+    #fix the decimal part
     digits = number[::-1].find('.')
     newNumber = f"{newNumber}"
     digitsNew = newNumber[::-1].find('.')
     if digitsNew > digits:
         newNumber = newNumber[0:-(digitsNew - digits)]
-    # digits = newNumber[::-1].find('.')
+    if digitsNew < digits:
+        newNumber = newNumber.ljust(digits-digitsNew + len(newNumber), '0')
+    #delete the point if not necessary
+    if newNumber[-1]=='.':
+        newNumber = newNumber[0:-1]
+
     return f"{newNumber}"
 
 
