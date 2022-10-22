@@ -32,9 +32,10 @@ for c in range(len(pumpvolume)):
         print("prezzoatt:" + str(pumpvolume[c]) + " -" + str(prezzoatt))
         if float(kijunsen[c]) > float(prezzoatt) > float(kijunsen[c]) * 0.96:
             prezzobuy = prezzoatt
-        elif float(prezzoatt) > float(kijunsen[c]) * 0.96 :
-            prezzobuy = utils.formatForBinance(str(prezzoatt), str(kijunsen[c])) # meglio con ticksize
-        else : break
+        elif float(prezzoatt) > float(kijunsen[c]) * 0.96:
+            prezzobuy = utils.formatForBinance(str(prezzoatt), str(kijunsen[c]))  # meglio con ticksize
+        else:
+            break
         print("prezzobuy:" + str(prezzobuy))
 
         # order BUY
@@ -52,12 +53,13 @@ for c in range(len(pumpvolume)):
 
 # oco orders
 
-#startTime = time_.time()
+# startTime = time_.time()
 
-while len(pumpvolume) > 0 :#and time_.time() - startTime < 10800:
+while len(pumpvolume) > 0:  # and time_.time() - startTime < 10800:
 
-    for d in range(len(pumpvolume)):
-        if currentOrder[d]["status"] == 'FILLED':
+    for d in range(len(pumpvolume) - 1):
+        currentOrd = client.get_order(symbol=pumpvolume[d], orderId=currentOrder[d]["orderId"])
+        if currentOrd[d]["status"] == 'FILLED':
             try:
                 client.order_oco_sell(symbol=pumpvolume[d],
                                       quantity=currentOrder[d]["executedQty"],
@@ -74,5 +76,5 @@ while len(pumpvolume) > 0 :#and time_.time() - startTime < 10800:
             del currentOrder[d]
     sleep(300)
 
-    # delete the orders which in 3h haven't been still FILLED
+# delete the orders which in 3h haven't been still FILLED
 utils.clean(client, currentOrder)
