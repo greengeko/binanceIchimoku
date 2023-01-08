@@ -1,5 +1,5 @@
 # binanceIchimoku
-
+####BOZZA, STILL TO BE EDITED
 #ENGLISH#
 Ichimoku Kinko Hyo (IKH) is a technical indicator that shows the trend levels of prices
 and determines the future support and resistance areas.
