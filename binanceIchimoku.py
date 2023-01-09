@@ -1,5 +1,4 @@
 import utils
-from datetime import time as time_
 from time import sleep
 
 client = utils.setProfile()
@@ -33,15 +32,15 @@ for c in range(len(pumpvolume)):
         if float(kijunsen[c]) > float(prezzoatt) > float(kijunsen[c]) * 0.96:
             prezzobuy = prezzoatt
         elif float(prezzoatt) > float(kijunsen[c]) * 0.96:
-            prezzobuy = utils.formatForBinance(str(prezzoatt), str(kijunsen[c]))  # meglio con ticksize
+            prezzobuy = utils.formatForBinance(str(prezzoatt), str(kijunsen[c]))
         else:
             break
         print("prezzobuy:" + str(prezzobuy))
 
         # order BUY
-        stepsize = client.get_symbol_info(symbol=pumpvolume[c])["filters"][2]["stepSize"]
-        print("stepsize " + str(stepsize))
-        quantity = utils.formatForBinance(stepsize, (0.002 / float(prezzoatt)))
+        precision = client.get_symbol_info(symbol=pumpvolume[c])["filters"][0]["minQty"]
+
+        quantity = utils.formatForBinance(precision, (0.002 / float(prezzoatt)))
         print(str(quantity))
         try:
             currentOrder.insert(c, client.order_limit_buy(symbol=pumpvolume[c],
