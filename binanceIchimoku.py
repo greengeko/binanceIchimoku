@@ -2,7 +2,7 @@ import utils
 from time import sleep
 
 client = utils.setProfile()
-coins = client.get_all_coins_info()
+#coins = client.get_all_coins_info()
 
 pumpvolume = utils.findPump(client)
 if len(pumpvolume) == 0:
@@ -38,7 +38,7 @@ for c in range(len(pumpvolume)):
         print("prezzobuy:" + str(prezzobuy))
 
         # order BUY
-        precision = client.get_symbol_info(symbol=pumpvolume[c])["filters"][0]["minQty"]
+        precision = client.get_symbol_info(symbol=pumpvolume[c])["filters"][0]["tickSize"]
 
         quantity = utils.formatForBinance(precision, (0.002 / float(prezzoatt)))
         print(str(quantity))
@@ -52,9 +52,9 @@ for c in range(len(pumpvolume)):
 
 # oco orders
 
-# startTime = time_.time()
 
-while len(pumpvolume) > 0:  # and time_.time() - startTime < 10800:
+
+while len(pumpvolume) > 0:
 
     for d in range(len(pumpvolume) - 1):
         currentOrd = client.get_order(symbol=pumpvolume[d], orderId=currentOrder[d]["orderId"])
