@@ -52,8 +52,6 @@ for c in range(len(pumpvolume)):
 
 # oco orders
 
-
-
 while len(pumpvolume) > 0:
 
     for d in range(len(pumpvolume) - 1):
